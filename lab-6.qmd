@@ -311,6 +311,23 @@ every combination of arguments from `diamonds.
 ```{r}
 #| label: exercise-5
 
+library(purrr)
 
+model_results <- df_arg_combos %>%
+  mutate(model = pmap(
+    list(impute, remove_outliers, mod_formula),
+    function(impute, remove_outliers, mod_formula) {
+      fit_model(
+        df = diamonds,
+        mod_formula = mod_formula,
+        impute_missing = impute,
+        remove_outliers = remove_outliers,
+        # vars for cleaning:
+        price, carat
+      )
+    }
+  ))
+
+print(model_results, n = 50)
 ```
 
