@@ -200,6 +200,26 @@ model is fit.
 ```{r}
 #| label: exercise-3
 
+fit_model <- function(df,
+                      mod_formula,
+                      remove_outliers = FALSE,
+                      impute_missing = FALSE,
+                      impute_fun = mean,
+                      sd_thresh = 3,
+                      ...) {
+
+  if (impute_missing) {
+    df <- impute_missing(df, ..., impute_fun = mean)
+  }
+
+  if (remove_outliers) {
+    df <- remove_outliers(df, ..., sd_thresh = 3)
+  }
+
+  model <- lm(mod_formula, data = df)
+
+  return(model)
+}
 
 ```
 
@@ -216,6 +236,8 @@ fit_model(
   price, 
   carat
 )
+
+
 ```
 
 # Iteration
