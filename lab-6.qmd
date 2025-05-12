@@ -284,6 +284,21 @@ combinations for our analyses.
 ```{r}
 #| label: exercise-4
 
+
+formulas <- list(
+  price ~ carat,
+  price ~ carat + cut,
+  price ~ carat + cut + clarity,
+  price ~ carat + cut + clarity + color
+)
+
+df_arg_combos <- tidyr::crossing(
+  impute = c(TRUE, FALSE),
+  remove_outliers = c(TRUE, FALSE),
+  mod_formula = formulas
+)
+
+df_arg_combos
 ```
 
 ## Iterating Over the Parameters
