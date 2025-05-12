@@ -122,7 +122,25 @@ variables to impute values for, and a function to use when imputing.
 ```{r}
 #| label: exercise-2
 
+library(nycflights13)
 
+impute_missing <- function(df, ..., impute_fun = mean) {
+  # Capture the selected variables
+  vars <- rlang::enquos(...)
+  
+  # Check all selected variables are numeric
+  all_numeric <- purrr::map_lgl(vars, ~ is.numeric(dplyr::pull(df, !!.x)))
+  if (!all(all_numeric)) {
+    stop("All selected variables must be numeric.")
+  }
+
+df %>%
+  mutate(across(
+    all_of(tidyselect::vars_select(names(df), !!!vars)),
+    ~ replace_na(.x, impute_fun(.x, na.rm = TRUE))
+  ))
+
+}
 ```
 
 ## Testing Your Function! 
@@ -136,6 +154,17 @@ impute_missing(nycflights13::flights,
                arr_delay, 
                dep_delay) 
 
+# Testing that there are no NAs in the imputed dataset
+
+flights_clean <- impute_missing(nycflights13::flights, arr_delay, dep_delay)
+
+# Check for remaining NAs
+flights_clean %>%
+  summarize(
+    arr_delay_missing = sum(is.na(arr_delay)),
+    dep_delay_missing = sum(is.na(dep_delay))
+  )
+
 ## Testing how your function handles an input that isn't numeric
 impute_missing(nycflights13::flights, 
                arr_delay, 
@@ -146,6 +175,13 @@ impute_missing(nycflights13::flights,
                arr_delay, 
                dep_delay, 
                impute_fun = median)
+
+# Checking to see if means and medians return different datasets
+flights_mean <- impute_missing(nycflights13::flights, arr_delay, dep_delay)
+flights_median <- impute_missing(nycflights13::flights, arr_delay, dep_delay, impute_fun = median)
+
+all.equal(flights_mean, flights_median)
+
 ```
 
 # Primary Function
