@@ -1,7 +1,12 @@
 ---
 title: "Lab 6 - Spicy"
+author: Matt
 subtitle: "Performing Many Different Versions of an Analysis"
 editor: source
+execute:
+  error: true
+code-fold: true
+code-tools: true
 ---
 
 This assignment will challenge your function writing abilities. I'm not going 
@@ -61,6 +66,23 @@ a threshold on the number of SDs away from the mean used to define outliers.
 
 ```{r}
 #| label: exercise-1
+
+library(tidyverse)
+
+remove_outliers <- function(df, ..., sd_thresh = 3) {
+  vars <- rlang::enquos(...)
+
+  # Check all selected variables are numeric
+  all_numeric <- purrr::map_lgl(vars, ~ is.numeric(dplyr::pull(df, !!.x)))
+  if (!all(all_numeric)) {
+    stop("All selected variables must be numeric.")
+  }
+
+  # Filter rows using if_all and tidy eval
+  df %>%
+    filter(if_all(all_of(tidyselect::vars_select(names(df), !!!vars)),
+                  ~ abs((.x - mean(.x, na.rm = TRUE)) / sd(.x, na.rm = TRUE)) < sd_thresh))
+}
 
 ```
 
